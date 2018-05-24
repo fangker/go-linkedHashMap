@@ -2,7 +2,6 @@ package linkedHashMap
 
 import (
 	"math"
-	"fmt"
 )
 
 const HASH_TABLE_SIZE = 2;
@@ -20,7 +19,7 @@ type LinkedHashMap struct {
 	table    []*entry
 	linkSize int
 	hashSize int
-	isRUL    bool
+	isLRU    bool
 }
 
 func NewLinkedHashMap() *LinkedHashMap {
@@ -31,10 +30,10 @@ func NewEntity(key int, value interface{}) *entry {
 	return &entry{key, value, nil, nil, nil}
 }
 
-func (this *LinkedHashMap) Init(initialCapacity int, isRUL bool) {
+func (this *LinkedHashMap) Init(initialCapacity int, isLRU bool) {
 	this.hashSize = int(math.Pow(2, math.Round(math.Log2(float64(initialCapacity)))))
 	this.table = []*entry{}
-	this.isRUL=isRUL
+	this.isLRU = isLRU
 	for i := 0; i < this.hashSize; i++ {
 		this.table = append(this.table, nil)
 	}
@@ -42,13 +41,15 @@ func (this *LinkedHashMap) Init(initialCapacity int, isRUL bool) {
 }
 
 func (this *LinkedHashMap) Put(key int, value interface{}) {
-	e, _ := this.bindEntry(key, value)
-	this.linkSize++
-	if this.linkSize!=1{
-	this.base.before.after=e
-	e.before = this.base.before
-	e.after = this.base
-		this.RecordAccess(this, e)
+	e, exist := this.bindEntry(key, value)
+	if !exist {
+		this.linkSize++
+		if this.linkSize > 1 {
+			this.base.before.after = e
+			e.before = this.base.before
+			e.after = this.base
+			this.RecordAccess(this, e)
+		}
 	}
 }
 
@@ -65,8 +66,8 @@ func (this *LinkedHashMap) Get(key int) interface{} {
 	return nil
 }
 
-func (this *LinkedHashMap) Remove(key int) (interface{}, bool) {
-	var exists bool
+func (this *LinkedHashMap) Remove(key int) (value interface{}, exists bool) {
+	var isExists bool
 	var r interface{}
 	i := hashCode(key, this.hashSize)
 	if item := this.table[i]; item == nil {
@@ -77,23 +78,26 @@ func (this *LinkedHashMap) Remove(key int) (interface{}, bool) {
 			if item.key == key {
 				item.before.after = item.after
 				item.after.before = item.before
-				pointer.next = item.next
+				if item.next != nil {
+					pointer.next = item.next
+				}
+				isExists = true
 				break
 			}
 			pointer = item
 			item = item.next
-			this.linkSize--
-			exists = true
 		}
-		return r, exists
+		*item=entry{}
 	}
+	this.linkSize--
+	return r, isExists
 }
 
 func (this *LinkedHashMap) RecordAccess(lhm *LinkedHashMap, e *entry) {
-	if (this.isRUL) {
-		fmt.Println(this.table)
+	tem:=*e
+	if (this.isLRU) {
 		if _, ok := lhm.Remove(e.key); ok {
-			lhm.AddBefore(lhm.base.after.key, e)
+			lhm.AddBefore(lhm.base.after.key, &tem)
 		}
 	}
 }
@@ -102,11 +106,12 @@ func (this *LinkedHashMap) AddBefore(key int, e *entry, ) (bool) {
 	if this.linkSize == 0 {
 		return false
 	}
-	e, exits := this.bindEntry(e.key, e.value)
+	be, exits := this.bindEntry(e.key, e.value)
 	if ct, ok := this.GetEntry(key); ok && !exits {
-		e.after = ct
-		ct.before.after = e
-		e = ct.before
+		//ct target,be ele
+		be.before=ct.before
+		be.after=ct
+		be.before.after=be
 		this.linkSize++
 		return true
 	} else {
@@ -122,7 +127,7 @@ func (this *LinkedHashMap) bindEntry(key int, value interface{}) (e *entry, exit
 	i := hashCode(key, this.hashSize)
 	e = NewEntity(key, value)
 	if item := this.table[i]; item == nil {
-		this.table[i]=e
+		this.table[i] = e
 		if (this.base.after == nil) {
 			this.base.after = e
 			this.base.before = e
@@ -132,10 +137,10 @@ func (this *LinkedHashMap) bindEntry(key int, value interface{}) (e *entry, exit
 		return e, false
 	} else {
 		for item.next != nil {
+			if (item.key == key) {
+				return item, true
+			}
 			item = item.next
-		}
-		if (item.key == key) {
-			return item, true
 		}
 		item.next = e
 		return e, false
@@ -158,3 +163,6 @@ func (this *LinkedHashMap) Base() *entry {
 	return this.base
 }
 
+func (this *LinkedHashMap) LinkSize() int {
+	return this.linkSize
+}
