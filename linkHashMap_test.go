@@ -14,10 +14,9 @@ func TestLinkhashMap(t *testing.T) {
 	lhm.Put(2, 1)
 	//lhm.Base()
 	lhm.Remove(1)
-	//lhm.Base()
 	//lhm.Put(1, 1)
 	lhm.Put(3, 1)
-	fmt.Println(lhm.Base().after.key,111111111)
+	fmt.Println(lhm.Base().after.key)
 	//fmt.Println(lhm.LinkSize())
 	//fmt.Println(lhm.Base().after.key)
 }
