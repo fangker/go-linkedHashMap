@@ -1,5 +1,8 @@
 ## GO LinkedHashMap
 
+LinkedHashMap supports dynamically capacity increasing.It's  It's very simple to build
+an least recently used cache.
+
 ###  install
 ```go
 go get github.com/fangker/go-linkedHashMap
@@ -20,9 +23,9 @@ lhm := NewLinkedHashMap()
 
 #### Initialize the LHM
 ```go
-lhm.Init(<int> initialCapasity, <bool> useLRU)
+lhm.Init(<int> initialCapacity, <bool> useLRU)
 ```
-The initial capasity parameter can suggest the length of hash arry
+The initial capacity parameter can suggest the length of hash arry
 
 #### Put Hash data
 ```go
@@ -44,6 +47,5 @@ lhm.Base()
 ```
 
 #### implement LRU Algorithm
-```
-
-```
+You can override "RecordAccess" function to implement LRU Algorithm.
+The default "RecordAccess" method,"MoveTo" method will be invoked.

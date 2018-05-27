@@ -6,8 +6,8 @@ import (
 )
 
 func TestLinkhashMap(t *testing.T) {
-	lhm := NewLinkedHashMap()
-	lhm.Init(1, true)
+
+	lhm:=NewLinkedHashMap(1,0.75,true)
 	lhm.Put(1, 1)
 	lhm.Put(3, 1)
 	lhm.Base()
@@ -16,7 +16,6 @@ func TestLinkhashMap(t *testing.T) {
 	lhm.Remove(1)
 	//lhm.Put(1, 1)
 	lhm.Put(3, 1)
+	fmt.Println(lhm.LinkSize())
 	fmt.Println(lhm.Base().after.key)
-	//fmt.Println(lhm.LinkSize())
-	//fmt.Println(lhm.Base().after.key)
 }
