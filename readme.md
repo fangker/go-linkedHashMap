@@ -48,4 +48,4 @@ lhm.Base()
 
 #### implement LRU Algorithm
 You can override "RecordAccess" function to implement LRU Algorithm.
-The default "RecordAccess" method,"MoveTo" method will be invoked.
+The default "RecordAccess" method "MoveTo" will be invoked.

@@ -11,9 +11,10 @@ type A struct {
 
 func TestLinkhhhMap(t *testing.T) {
 	a:=&A{name:"121323"}
-	var b *A
-	b = &A{}
-	b=a
-	b.name="fgfsdf"
-	fmt.Println(a,b)
+	c:=&A{name:"666666"}
+	a.haha(c)
+	fmt.Println(a)
+}
+func (this *A)haha(a *A)  {
+	*this=*a
 }
