@@ -2,12 +2,13 @@ package linkedHashMap
 
 import (
 	"math"
+	"unsafe"
 )
 
 const HASH_TABLE_SIZE = 2 << 7;
 
 type entry struct {
-	key    int
+	key    interface{}
 	value  interface{}
 	after  *entry
 	before *entry
@@ -23,7 +24,7 @@ type LinkedHashMap struct {
 	loadFactory float64
 }
 
-func NewEntity(key int, value interface{}) *entry {
+func NewEntity(key , value interface{}) *entry {
 	return &entry{key, value, nil, nil, nil}
 }
 
@@ -40,7 +41,7 @@ func NewLinkedHashMap(initialCapacity int, loadFactor float64, isLRU bool) *Link
 	return this
 }
 
-func (this *LinkedHashMap) Put(key int, value interface{}) {
+func (this *LinkedHashMap) Put(key, value interface{}) {
 	e, exist, lhm := this.bindEntry(key, value)
 	if lhm != this {
 		// extend
@@ -130,7 +131,6 @@ func (this *LinkedHashMap) AddBefore(key int, e *entry, ) (bool) {
 	be, exits, _ := this.bindEntry(e.key, e.value)
 	if ct, ok := this.GetEntry(key); ok && !exits {
 		//ct-> target,be -> ele
-
 		be.before = ct.before
 		be.after = ct
 		be.before.after = be
@@ -142,11 +142,11 @@ func (this *LinkedHashMap) AddBefore(key int, e *entry, ) (bool) {
 	}
 }
 
-func hashCode(key int, len int) int {
-	return key & (len - 1)
+func hashCode(key interface{}, len int) int {
+	return *(*int)(unsafe.Pointer(&key)) & (len - 1)
 }
 
-func (this *LinkedHashMap) bindEntry(key int, value interface{}) (e *entry, exits bool, lhm *LinkedHashMap) {
+func (this *LinkedHashMap) bindEntry(key, value interface{}) (e *entry, exits bool, lhm *LinkedHashMap) {
 	i := hashCode(key, this.hashSize)
 	e = NewEntity(key, value)
 	if item := this.table[i]; item == nil {
